@@ -18,29 +18,33 @@ body {
    NAVBAR
 =========================== */
 .navbar {
+  position: fixed;          /* selalu ikut scroll */
+  top: 0;
+  left: 0;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 40px;
-  background: rgba(0, 0, 0, 0.3);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  padding: 15px 40px;
+  background: rgba(0, 0, 0, 0.3); /* transparan */
+  backdrop-filter: blur(6px);     /* efek blur elegan */
+  z-index: 1000;
 }
 
 .logo {
   font-size: 1.5rem;
   font-weight: bold;
+  color: #00ffff;
 }
 
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 30px;
+  gap: 25px;
 }
 
 .nav-links a {
-  color: white;
+  color: #fff;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
@@ -48,6 +52,50 @@ body {
 
 .nav-links a:hover {
   color: #00ffff;
+}
+
+/* Tambah padding di body supaya konten tidak ketutup navbar */
+body {
+  padding-top: 70px; /* sesuaikan dengan tinggi navbar */
+}
+/* ===========================
+   NAVBAR RESPONSIVE
+=========================== */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 10px 20px;          /* lebih kecil */
+  }
+
+  .logo {
+    font-size: 1.2rem;           /* logo lebih kecil */
+  }
+
+  .nav-links {
+    flex-direction: column;      /* menu jadi vertikal */
+    gap: 10px;                   /* jarak antar menu lebih rapat */
+    padding: 15px;
+    background: rgba(0,0,0,0.6); /* transparan dengan background tipis */
+    border-radius: 8px;
+  }
+
+  .nav-links a {
+    font-size: 0.9rem;           /* teks menu lebih kecil */
+    padding: 8px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 8px 15px;           /* makin kecil di HP kecil */
+  }
+
+  .logo {
+    font-size: 1rem;
+  }
+
+  .nav-links a {
+    font-size: 0.8rem;
+  }
 }
 
 /* ===========================
