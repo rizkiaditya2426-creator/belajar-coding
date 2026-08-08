@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#d9468c">
+  <title>Sebuah Pesan Untukmu 💌</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --pink:#ec4899;
+      --pink-2:#f472b6;
+      --purple:#8b5cf6;
+      --soft:#fff1f8;
+      --white:rgba(255,255,255,.78);
+      --text:#3b1730;
+      --muted:#82516f;
+      --shadow:0 24px 70px rgba(94,24,73,.20);
+      --ease:cubic-bezier(.22,1,.36,1);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;overflow-x:hidden}
+    body{
+      font-family:"DM Sans",system-ui,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 15%,rgba(255,255,255,.75),transparent 28%),
+        radial-gradient(circle at 85% 85%,rgba(196,181,253,.55),transparent 32%),
+        linear-gradient(135deg,#ffd9ed 0%,#f7d8ff 48%,#dcd5ff 100%);
+    }
+    button,input{font:inherit}
+    button{border:0;cursor:pointer}
+    .app{min-height:100vh;position:relative;isolation:isolate}
+    #particles,#confetti,#sparkles{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+    #particles{z-index:-2}
+    #confetti,#sparkles{z-index:20}
+    .blob{position:fixed;border-radius:50%;filter:blur(45px);opacity:.28;pointer-events:none;z-index:-3}
+    .blob.a{width:260px;height:260px;background:#ff7eb8;left:-80px;top:12%}
+    .blob.b{width:320px;height:320px;background:#9d7cff;right:-100px;bottom:5%}
+
+    .loading{
+      position:fixed;inset:0;z-index:100;display:grid;place-items:center;
+      background:linear-gradient(135deg,#fce7f3,#ede9fe);
+      transition:opacity .7s ease,visibility .7s ease;
+    }
+    .loading.hide{opacity:0;visibility:hidden}
+    .loader{text-align:center}
+    .loader-heart{font-size:52px;animation:heartBeat 1s infinite}
+    .loader p{margin:12px 0 0;color:var(--muted);font-weight:600}
+
+    .screen{
+      min-height:100vh;display:grid;place-items:center;padding:28px 18px;
+      transition:opacity .45s var(--ease),transform .55s var(--ease),filter .55s var(--ease);
+    }
+    .screen.hidden{display:none}
+    .screen.leaving{opacity:0;transform:scale(.96);filter:blur(8px)}
+    .card{
+      width:min(100%,520px);padding:clamp(28px,6vw,48px);
+      background:var(--white);border:1px solid rgba(255,255,255,.75);
+      box-shadow:var(--shadow);border-radius:30px;
+      backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+      position:relative;overflow:hidden;
+    }
+    .card:before{
+      content:"";position:absolute;inset:-50% auto auto -20%;width:180px;height:180px;
+      background:rgba(255,255,255,.45);border-radius:50%;filter:blur(5px)
+    }
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;
+      background:rgba(236,72,153,.09);color:#bd3e7c;font-size:12px;font-weight:700;
+      letter-spacing:.04em;margin-bottom:16px
+    }
+    h1,h2{font-family:"Playfair Display",Georgia,serif;margin:0}
+    .login-title{font-size:clamp(32px,8vw,48px);line-height:1.05}
+    .subtitle{color:var(--muted);line-height:1.65;margin:14px 0 28px}
+    .field{position:relative;margin:16px 0}
+    .field input{
+      width:100%;height:58px;border:1px solid rgba(120,54,102,.16);border-radius:17px;
+      padding:20px 16px 7px;background:rgba(255,255,255,.55);outline:none;color:var(--text);
+      transition:.25s ease
+    }
+    .field label{
+      position:absolute;left:16px;top:7px;font-size:11px;font-weight:700;color:#9a6685;
+      pointer-events:none
+    }
+    .field input:focus{border-color:rgba(236,72,153,.6);box-shadow:0 0 0 4px rgba(236,72,153,.10)}
+    .primary{
+      width:100%;height:58px;border-radius:17px;color:white;font-weight:800;
+      background:linear-gradient(135deg,var(--pink),#c026d3);box-shadow:0 12px 26px rgba(236,72,153,.28);
+      transition:transform .2s ease,box-shadow .2s ease
+    }
+    .primary:hover{transform:translateY(-2px);box-shadow:0 16px 30px rgba(236,72,153,.34)}
+    .primary:active,.choice:active{transform:scale(.97)}
+    .hint{font-size:12px;color:#a27491;text-align:center;margin:14px 0 0}
+    .error{min-height:22px;color:#c02665;text-align:center;font-size:13px;font-weight:700;margin-top:10px}
+
+    .music{
+      position:fixed;right:16px;top:16px;z-index:30;padding:10px 14px;border-radius:999px;
+      background:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.8);
+      box-shadow:0 10px 30px rgba(83,30,73,.12);backdrop-filter:blur(12px);
+      color:var(--text);font-weight:700;display:none
+    }
+    .music.show{display:block}
+    .content{text-align:center;width:min(100%,760px)}
+    .mini-heart{font-size:42px;display:block;animation:floaty 3s ease-in-out infinite}
+    .content h2{font-size:clamp(35px,7vw,62px);line-height:1.05;margin:16px 0}
+    .type-line{min-height:30px;color:var(--muted);font-size:clamp(15px,3vw,18px)}
+    .message{
+      margin:28px auto 30px;max-width:720px;padding:25px 24px;border-radius:24px;
+      background:rgba(255,255,255,.52);border:1px solid rgba(255,255,255,.8);
+      box-shadow:0 15px 45px rgba(91,35,72,.11)
+    }
+    .message strong{font-size:clamp(22px,5vw,35px);line-height:1.3}
+    .choices{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;min-height:64px;position:relative}
+    .choice{
+      min-width:150px;height:58px;padding:0 26px;border-radius:999px;font-weight:800;
+      transition:transform .22s var(--ease),left .22s var(--ease),top .22s var(--ease),box-shadow .22s ease;
+      position:relative
+    }
+    .yes{color:white;background:linear-gradient(135deg,#ec4899,#db2777);box-shadow:0 12px 28px rgba(219,39,119,.28)}
+    .no{color:#7a4665;background:rgba(255,255,255,.72);border:1px solid rgba(122,70,101,.13)}
+    .no.runaway{position:fixed;z-index:40}
+    .tease{height:26px;margin-top:14px;color:#a14b78;font-size:13px;font-weight:700;opacity:0;transition:.2s}
+    .tease.show{opacity:1}
+    .progress{margin-top:28px;font-size:12px;color:#9a6685}
+
+    .ending{position:relative}
+    .ending-card{padding:42px 24px}
+    .big-heart{
+      font-size:100px;line-height:1;display:block;margin-bottom:18px;
+      filter:drop-shadow(0 14px 20px rgba(236,72,153,.25));
+      animation:bigHeart 1.8s var(--ease) infinite
+    }
+    .ending h2{font-size:clamp(44px,10vw,76px)}
+    .ending .love-line{font-size:clamp(19px,4vw,26px);font-weight:700;line-height:1.5;margin:18px auto;max-width:620px}
+    .name{font-weight:800;color:#c02665;letter-spacing:.04em}
+    .restart{margin-top:25px;width:auto;padding:0 24px;height:48px}
+
+    .particle{
+      position:absolute;bottom:-50px;will-change:transform,opacity;
+      animation:rise linear forwards;user-select:none
+    }
+    .piece{
+      position:fixed;top:-30px;animation:fall linear forwards;will-change:transform,opacity;
+      font-size:20px
+    }
+    .spark{position:fixed;font-size:20px;animation:spark .9s ease-out forwards}
+
+    @keyframes rise{to{transform:translate3d(var(--dx),-115vh,0) rotate(var(--rot));opacity:0}}
+    @keyframes fall{to{transform:translate3d(var(--dx),110vh,0) rotate(var(--rot));opacity:0}}
+    @keyframes spark{0%{transform:scale(.2);opacity:0}25%{opacity:1}100%{transform:translate(var(--x),var(--y)) scale(1.35) rotate(180deg);opacity:0}}
+    @keyframes floaty{50%{transform:translateY(-9px) rotate(3deg)}}
+    @keyframes heartBeat{0%,100%{transform:scale(1)}30%{transform:scale(1.18)}45%{transform:scale(.96)}60%{transform:scale(1.1)}}
+    @keyframes bigHeart{0%,100%{transform:scale(1);filter:drop-shadow(0 14px 20px rgba(236,72,153,.25))}50%{transform:scale(1.12);filter:drop-shadow(0 0 34px rgba(236,72,153,.58))}}
+
+    @media(max-width:520px){
+      .screen{padding:20px 14px}
+      .card{border-radius:25px;padding:27px 20px}
+      .choice{min-width:135px}
+      .message{padding:22px 16px}
+      .music{top:10px;right:10px}
+    }
+    @media(prefers-reduced-motion:reduce){
+      *,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="blob a"></div><div class="blob b"></div>
+  <div id="particles" aria-hidden="true"></div>
+  <div id="confetti" aria-hidden="true"></div>
+  <div id="sparkles" aria-hidden="true"></div>
+
+  <div class="loading" id="loading">
+    <div class="loader"><div class="loader-heart">❤️</div><p>Menyiapkan sesuatu...</p></div>
+  </div>
+
+  <button class="music" id="musicBtn" type="button" aria-label="Nyalakan atau matikan musik">🔊 Music</button>
+  <audio id="music" loop preload="none">
+    <source src="hanya kamu.mp3" type="audio/mpeg">
+  </audio>
+
+  <main>
+    <section class="screen" id="loginScreen" aria-labelledby="loginTitle">
+      <div class="card">
+        <div class="eyebrow">PRIVATE MESSAGE · 01 💌</div>
+        <h1 class="login-title" id="loginTitle">Sebuah pesan untukmu 💌</h1>
+        <p class="subtitle">Tapi sebelum itu... masuk dulu ya 👀</p>
+
+        <form id="loginForm" autocomplete="off">
+          <div class="field">
+            <label for="name">Nama</label>
+            <input id="name" name="name" type="text" placeholder=" " required>
+          </div>
+          <div class="field">
+            <label for="password">Tanggal lahir</label>
+            <input id="password" name="password" type="password" placeholder=" " inputmode="numeric" required>
+          </div>
+          <button class="primary" type="submit">Masuk ❤️</button>
+          <div class="error" id="loginError" role="status" aria-live="polite"></div>
+          <p class="hint">Psst... seharusnya kamu tahu jawabannya 😌</p>
+        </form>
+      </div>
+    </section>
+
+    <section class="screen hidden" id="confession1" aria-labelledby="confessTitle">
+      <div class="content">
+        <span class="mini-heart">💗</span>
+        <h2 id="confessTitle">Ada sesuatu yang mau aku bilang...</h2>
+        <div class="type-line" id="typing"></div>
+        <div class="message">
+          <strong>Daripada when when terus, mau gak kita ke hubungan serius? ❤️</strong>
+        </div>
+        <div class="choices" id="choices1">
+          <button class="choice yes" type="button" id="yes1">❤️ Mau</button>
+          <button class="choice no" type="button" id="no1">😏 Nggak</button>
+        </div>
+        <div class="tease" id="tease1"></div>
+        <div class="progress">satu pertanyaan kecil... 👀</div>
+      </div>
+    </section>
+
+    <section class="screen hidden" id="confession2" aria-labelledby="question2">
+      <div class="content">
+        <span class="mini-heart">💖</span>
+        <h2 id="question2">Serius nih? 👀❤️</h2>
+        <div class="message">
+          <strong>Do you will be my girlfriend? 💗</strong>
+        </div>
+        <div class="choices" id="choices2">
+          <button class="choice yes" type="button" id="yes2">❤️ Mau</button>
+          <button class="choice no" type="button" id="no2">😏 Nggak</button>
+        </div>
+        <div class="tease" id="tease2"></div>
+        <div class="progress">oke, ini pertanyaan terakhir... promise 😭</div>
+      </div>
+    </section>
+
+    <section class="screen hidden ending" id="ending" aria-labelledby="endingTitle">
+      <div class="card ending-card">
+        <span class="big-heart">❤️</span>
+        <h2 id="endingTitle">YEEEAYYY!! ❤️😭</h2>
+        <p class="love-line">Mulai hari ini, kita bukan cuma when when lagi.</p>
+        <p class="love-line">Makasih udah mau jadi bagian dari cerita ini ❤️</p>
+        <div class="name">❤️ Jasmin Valencia Putri ❤️</div>
+        <button class="primary restart" id="restart" type="button">Ulang dari awal ✨</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const $ = (s) => document.querySelector(s);
+  const screens = {
+    login: $("#loginScreen"),
+    one: $("#confession1"),
+    two: $("#confession2"),
+    ending: $("#ending")
+  };
+  const particles = $("#particles");
+  const confetti = $("#confetti");
+  const sparkles = $("#sparkles");
+  const music = $("#music");
+  const musicBtn = $("#musicBtn");
+  const loginForm = $("#loginForm");
+  const loginError = $("#loginError");
+
+  const teaseTexts = [
+    "Eits 😭", "Jangan pilih aku dong", "Salah tombol wkwk",
+    "Coba lagi 😭", "Hmmmm...", "Nggak bisa 😌", "Tombolnya malu 😭❤️"
+  ];
+  const secondTeases = [
+    "Yakin? 😭", "Jangan bohong dong ❤️",
+    "Tombol ini nggak menerima penolakan 😭", "Coba tombol sebelah 👀",
+    "Hehehe nggak bisa 😌"
+  ];
+
+  let activeScreen = screens.login;
+  let runawayCount1 = 0;
+  let runawayCount2 = 0;
+  let musicReady = false;
+
+  function showScreen(next) {
+    if (activeScreen === next) return;
+    const old = activeScreen;
+    old.classList.add("leaving");
+    setTimeout(() => {
+      old.classList.add("hidden");
+      old.classList.remove("leaving");
+      next.classList.remove("hidden");
+      requestAnimationFrame(() => next.style.opacity = "1");
+      activeScreen = next;
+      window.scrollTo({top:0, behavior:"smooth"});
+    }, 420);
+  }
+
+  function createHeart() {
+    const el = document.createElement("span");
+    el.className = "particle";
+    el.textContent = ["♡","♥","❤","💕","💗"][Math.floor(Math.random()*5)];
+    el.style.left = Math.random()*100 + "vw";
+    el.style.fontSize = (10 + Math.random()*18) + "px";
+    el.style.opacity = (.15 + Math.random()*.42).toFixed(2);
+    el.style.setProperty("--dx", ((Math.random()-.5)*180) + "px");
+    el.style.setProperty("--rot", ((Math.random()-.5)*100) + "deg");
+    el.style.animationDuration = (7 + Math.random()*8) + "s";
+    particles.appendChild(el);
+    setTimeout(() => el.remove(), 16000);
+  }
+  for(let i=0;i<18;i++) setTimeout(createHeart, i*220);
+  setInterval(createHeart, 650);
+
+  function burst(x = innerWidth/2, y = innerHeight/2) {
+    const emojis = ["❤️","💕","💗","💖","✨"];
+    for(let i=0;i<45;i++){
+      const el = document.createElement("span");
+      el.className = "piece";
+      el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      el.style.left = (x + (Math.random()-.5)*160) + "px";
+      el.style.top = (y + (Math.random()-.5)*60) + "px";
+      el.style.fontSize = (12 + Math.random()*18) + "px";
+      el.style.setProperty("--dx", ((Math.random()-.5)*innerWidth*.8) + "px");
+      el.style.setProperty("--rot", ((Math.random()-.5)*720) + "deg");
+      el.style.animationDuration = (2.8 + Math.random()*2.8) + "s";
+      confetti.appendChild(el);
+      setTimeout(()=>el.remove(),6000);
+    }
+  }
+
+  function sparkBurst(x,y) {
+    for(let i=0;i<14;i++){
+      const s=document.createElement("span");
+      s.className="spark";
+      s.textContent="✦";
+      s.style.left=x+"px"; s.style.top=y+"px";
+      s.style.setProperty("--x",((Math.random()-.5)*180)+"px");
+      s.style.setProperty("--y",((Math.random()-.5)*180)+"px");
+      sparkles.appendChild(s);
+      setTimeout(()=>s.remove(),1000);
+    }
+  }
+
+  function showTease(el, texts) {
+    el.textContent = texts[Math.floor(Math.random()*texts.length)];
+    el.classList.remove("show");
+    requestAnimationFrame(()=>el.classList.add("show"));
+    setTimeout(()=>el.classList.remove("show"),1150);
+  }
+
+  function moveNo(button, tease, texts) {
+    const pad = 12;
+    const w = button.offsetWidth || 140;
+    const h = button.offsetHeight || 58;
+    const maxX = Math.max(pad, innerWidth - w - pad);
+    const maxY = Math.max(80, innerHeight - h - pad);
+    let x = pad + Math.random() * (maxX-pad);
+    let y = 70 + Math.random() * Math.max(10,maxY-70);
+
+    // Hindari area tombol Mau di sekitar tengah.
+    const yes = button.parentElement.querySelector(".yes");
+    if (yes) {
+      const r = yes.getBoundingClientRect();
+      for(let i=0;i<12;i++){
+        if(!(x+w<r.left-25 || x>r.right+25 || y+h<r.top-25 || y>r.bottom+25)){
+          x = pad + Math.random()*(maxX-pad);
+          y = 70 + Math.random()*Math.max(10,maxY-70);
+        } else break;
+      }
+    }
+    button.classList.add("runaway");
+    button.style.left=x+"px";
+    button.style.top=y+"px";
+    button.style.transform=`rotate(${(Math.random()-.5)*18}deg)`;
+    showTease(tease,texts);
+    sparkBurst(Math.min(innerWidth-20,Math.max(20,x+w/2)),Math.min(innerHeight-20,Math.max(50,y+h/2)));
+  }
+
+  function bindRunaway(button, tease, texts, counter) {
+    const evade = (e) => {
+      if(e) e.preventDefault();
+      if(counter === 1) runawayCount1++; else runawayCount2++;
+      moveNo(button, tease, texts);
+    };
+    button.addEventListener("pointerenter", evade);
+    button.addEventListener("pointerdown", evade);
+    button.addEventListener("focus", () => moveNo(button, tease, texts));
+  }
+
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = $("#name").value.trim().toLowerCase();
+    const password = $("#password").value.trim();
+    if(name === "jasmin valencia putri" && password === "14022011"){
+      loginError.textContent = "Berhasil ❤️";
+      loginError.style.color = "#b42367";
+      burst(innerWidth/2, innerHeight/2);
+      if(!musicReady){
+        musicReady = true;
+        musicBtn.classList.add("show");
+        music.play().catch(()=>{});
+      }
+      setTimeout(() => {
+        showScreen(screens.one);
+        typeText("typing","Oke... sekarang jangan kabur dulu ya 😭❤️",42);
+      },900);
+    } else {
+      loginError.textContent = "Hmm... kayaknya kamu bukan orang yang aku cari 👀❤️";
+      loginError.style.color = "#c02665";
+      sparkBurst(innerWidth/2, innerHeight/2);
+    }
+  });
+
+  function typeText(targetId,text,speed){
+    const target=$("#"+targetId);
+    target.textContent="";
+    let i=0;
+    const timer=setInterval(()=>{
+      target.textContent += text[i++];
+      if(i>=text.length) clearInterval(timer);
+    },speed);
+  }
+
+  bindRunaway($("#no1"), $("#tease1"), teaseTexts, 1);
+  bindRunaway($("#no2"), $("#tease2"), secondTeases, 2);
+
+  $("#yes1").addEventListener("click",(e)=>{
+    burst(e.clientX,e.clientY);
+    showScreen(screens.two);
+  });
+
+  $("#yes2").addEventListener("click",(e)=>{
+    burst(e.clientX,e.clientY);
+    setTimeout(()=>burst(innerWidth*.25,innerHeight*.2),250);
+    setTimeout(()=>burst(innerWidth*.75,innerHeight*.25),500);
+    setTimeout(()=>burst(innerWidth*.5,innerHeight*.1),800);
+    showScreen(screens.ending);
+  });
+
+  musicBtn.addEventListener("click", async () => {
+    if(music.paused){
+      try{ await music.play(); musicBtn.textContent="🔊 Music"; }
+      catch{ musicBtn.textContent="🎵 music.mp3"; }
+    } else {
+      music.pause(); musicBtn.textContent="🔇 Music";
+    }
+  });
+
+  $("#restart").addEventListener("click",()=>{
+    document.querySelectorAll(".runaway").forEach(b=>{
+      b.classList.remove("runaway");
+      b.style.left=""; b.style.top=""; b.style.transform="";
+    });
+    runawayCount1=0; runawayCount2=0;
+    loginForm.reset();
+    loginError.textContent="";
+    showScreen(screens.login);
+  });
+
+  window.addEventListener("resize",()=>{
+    document.querySelectorAll(".runaway").forEach(b=>{
+      const r=b.getBoundingClientRect();
+      const maxX=Math.max(12,innerWidth-b.offsetWidth-12);
+      const maxY=Math.max(70,innerHeight-b.offsetHeight-12);
+      b.style.left=Math.min(Math.max(12,r.left),maxX)+"px";
+      b.style.top=Math.min(Math.max(70,r.top),maxY)+"px";
+    });
+  });
+
+  // Hilangkan loading screen setelah UI siap.
+  window.addEventListener("load",()=>{
+    setTimeout(()=>$("#loading").classList.add("hide"),700);
+  });
+})();
+</script>
+</body>
+</html>
